@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Snapshot Interpolation — Işınlanan vs İnterpole Edilen</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <canvas id="scene"></canvas>
+
+    <div id="labels">
+      <span class="label label-naive">SOL: NAIVE (SNAPSHOT GELDİ, IŞINLAN)</span>
+      <span class="label label-interp">SAĞ: SNAPSHOT INTERPOLATION</span>
+    </div>
+
+    <aside id="hud"></aside>
+
+    <aside id="controls">
+      <h2>KONTROL</h2>
+
+      <label class="ctl">
+        <span class="ctl-name">SNAPSHOT RATE</span>
+        <input id="rate" type="range" min="5" max="30" step="1" value="15" />
+        <output id="rate-out">15 Hz</output>
+      </label>
+
+      <label class="ctl">
+        <span class="ctl-name">INTERPOLATION DELAY</span>
+        <input id="delay" type="range" min="0" max="300" step="1" value="100" />
+        <output id="delay-out">100 ms</output>
+      </label>
+
+      <label class="ctl">
+        <span class="ctl-name">LATENCY</span>
+        <input id="latency" type="range" min="0" max="200" step="1" value="60" />
+        <output id="latency-out">60 ms</output>
+      </label>
+
+      <label class="ctl">
+        <span class="ctl-name">JITTER</span>
+        <input id="jitter" type="range" min="0" max="80" step="1" value="20" />
+        <output id="jitter-out">±20 ms</output>
+      </label>
+
+      <label class="ctl">
+        <span class="ctl-name">LOSS RATE</span>
+        <input id="loss" type="range" min="0" max="30" step="1" value="0" />
+        <output id="loss-out">%0</output>
+      </label>
+
+      <label class="ctl ctl-check">
+        <input id="naive-quat" type="checkbox" />
+        <span class="ctl-name">NAIVE QUAT LERP (sağ küme)</span>
+      </label>
+
+      <button id="measure" type="button">Ölç (10 s)</button>
+      <p id="measure-state" class="hint">Ölçüm elle tetiklenir. Otomatik süpürme yok.</p>
+    </aside>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

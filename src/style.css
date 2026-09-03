@@ -1,0 +1,193 @@
+:root {
+  --cyan: #22d3ee;
+  --violet: #a78bfa;
+  --magenta: #f472b6;
+  --ink: #dbe4f7;
+  --dim: #7c8ba8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: radial-gradient(ellipse at 50% 0%, #10141f 0%, #080a11 55%, #05060b 100%), #05060b;
+  color: var(--ink);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size: 12px;
+}
+
+#scene {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+#labels {
+  position: fixed;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 48px;
+  pointer-events: none;
+}
+
+/* DİKKAT: text-transform: uppercase YOK. lang="tr" ile birlikte İngilizce "i"
+   harfini "İ" yapar (INTERPOLATION -> İNTERPOLATİON). Etiketler kaynakta büyük. */
+.label {
+  letter-spacing: 0.08em;
+  font-size: 11px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(8, 10, 17, 0.55);
+  backdrop-filter: blur(6px);
+}
+
+.label-naive {
+  color: var(--cyan);
+}
+
+.label-interp {
+  color: var(--violet);
+}
+
+#hud,
+#controls {
+  position: fixed;
+  top: 60px;
+  width: 268px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(8, 10, 17, 0.62);
+  backdrop-filter: blur(10px);
+}
+
+#hud {
+  left: 16px;
+}
+
+#controls {
+  right: 16px;
+}
+
+h2 {
+  margin: 0 0 10px;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--magenta);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.hud-block + .hud-block {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.12);
+}
+
+.hud-model h2 {
+  color: var(--dim);
+}
+
+.hud-note {
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  color: var(--dim);
+  font-weight: 400;
+}
+
+.hud-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  line-height: 1.75;
+}
+
+.hud-key {
+  color: var(--dim);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+}
+
+.hud-value {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.hud-model .hud-value {
+  color: var(--dim);
+}
+
+.ctl {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 8px;
+  margin-bottom: 12px;
+}
+
+.ctl-name {
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  color: var(--dim);
+}
+
+.ctl input[type="range"] {
+  grid-column: 1 / -1;
+  width: 100%;
+  accent-color: var(--violet);
+}
+
+.ctl output {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.ctl-check {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+}
+
+.ctl-check input {
+  accent-color: var(--magenta);
+}
+
+button {
+  width: 100%;
+  padding: 9px;
+  border-radius: 8px;
+  border: 1px solid rgba(244, 114, 182, 0.4);
+  background: rgba(244, 114, 182, 0.12);
+  color: var(--magenta);
+  font: inherit;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+
+button:hover {
+  background: rgba(244, 114, 182, 0.22);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.hint {
+  margin: 8px 0 0;
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--dim);
+}

@@ -1,0 +1,31 @@
+import { Vector3 } from "three";
+import { describe, expect, it } from "vitest";
+import { mulberry32 } from "../src/rng";
+
+/** Vector3.lerp'in içi: this.x += (v.x - this.x) * alpha */
+const lerp1 = (a: number, b: number, t: number) => a + (b - a) * t;
+
+describe("alpha = 1'de kayan nokta", () => {
+  it("büyüklükler ayrışınca a + (b - a) tam olarak b DEĞİL", () => {
+    const a = 948276.8422458321;
+    const b = 9.533007256686686e-8;
+
+    expect(lerp1(a, b, 1)).toBe(9.534414857625961e-8);
+    expect(lerp1(a, b, 1)).not.toBe(b);
+
+    // Aynı sapma Vector3.lerp üstünde de görünür — kendi aritmetiğimiz değil, three'ninki.
+    const v = new Vector3(a, 0, 0).lerp(new Vector3(b, 0, 0), 1);
+    expect(v.x).toBe(9.534414857625961e-8);
+  });
+
+  it("oyun ölçeğinde ([-100, 100], tohum 1337, 200.000 örnek) sapma YOK", () => {
+    const rand = mulberry32(1337);
+    let deviations = 0;
+    for (let i = 0; i < 200_000; i++) {
+      const a = rand() * 200 - 100;
+      const b = rand() * 200 - 100;
+      if (lerp1(a, b, 1) !== b) deviations++;
+    }
+    expect(deviations).toBe(0);
+  });
+});
