@@ -4,6 +4,8 @@
 **▶ [Live demo](https://m2-md.github.io/snapshot-interpolation-threejs/)** · [Source](https://github.com/m2-md/snapshot-interpolation-threejs)
 <!-- LINKS:END -->
 
+> Smooth remote entity synchronization over lossy networks: ring buffer snapshot history, position interpolation, quaternion Slerp, and dynamic latency adjustment.
+
 Working code for the article "Drawing the Remote Player in the Past: Snapshot Buffer,
 Slerp and the Latency Bargain in Three.js". When the server speaks 15 times a second
 while the screen draws 120 times a second, this is the whole pipeline that draws
