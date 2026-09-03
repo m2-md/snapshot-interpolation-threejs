@@ -33,7 +33,7 @@ export class FakeTransport<T> {
     this.latencyMs = options.latencyMs;
     this.jitterMs = options.jitterMs;
     this.lossRate = options.lossRate;
-    // İKİ AYRI akış: kayıp oranını değiştirmek jitter dizisini bozmasın.
+    // Two SEPARATE streams: changing loss rate should not alter the jitter sequence.
     this.rollLoss = mulberry32(options.seed);
     this.rollJitter = mulberry32(options.seed ^ 0x9e37_79b9);
   }
@@ -43,7 +43,7 @@ export class FakeTransport<T> {
     this.sent++;
 
     const lossRoll = this.rollLoss();
-    // Jitter HER pakette çekilir — düşen paketlerde bile. Akışların bağımsızlığı buna bağlı.
+    // Jitter is sampled on every packet — even dropped ones. Independence of streams depends on this.
     const jitter = (this.rollJitter() * 2 - 1) * this.jitterMs;
 
     if (lossRoll < this.lossRate) {
@@ -55,7 +55,7 @@ export class FakeTransport<T> {
     return true;
   }
 
-  /** now'a kadar varmış paketleri VARIŞ sırasına göre teslim eder. */
+  /** Delivers packets that arrived by 'now' in order of ARRIVAL. */
   poll(now: number): T[] {
     const ready: InFlight<T>[] = [];
     for (let i = this.queue.length - 1; i >= 0; i--) {

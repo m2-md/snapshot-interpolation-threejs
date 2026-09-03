@@ -30,26 +30,26 @@ export class SnapshotBuffer<T extends Timed> {
     return this.items;
   }
 
-  /** Sıralı ekleme. Yinelenen tick yok sayılır. Dönüş: tampona girdi mi. */
+  /** Ordered insertion. Duplicate ticks are ignored. Returns whether it was inserted into buffer. */
   insert(snapshot: T): boolean {
     const items = this.items;
-    // Sondan geriye tara: paketler ÇOĞUNLUKLA sıralı gelir, tarama tipik olarak 0 adım sürer.
+    // Scan backwards: packets mostly arrive in order, scanning typically takes 0 steps.
     let i = items.length - 1;
     while (i >= 0 && items[i].serverTime > snapshot.serverTime) i--;
 
-    if (i >= 0 && items[i].tick === snapshot.tick) return false; // yinelenen paket
+    if (i >= 0 && items[i].tick === snapshot.tick) return false; // duplicate packet
 
     items.splice(i + 1, 0, snapshot);
 
     if (items.length > this.capacity) {
       const dropped = items.shift();
-      // Çok geç gelen paket tamponun dibine düşer ve aynı karede taşar.
+      // Very late arriving packet drops to bottom of buffer and overflows in the same frame.
       if (dropped === snapshot) return false;
     }
     return true;
   }
 
-  /** renderTime'ı kapsayan çiftten daha eskisini at. Bir tane geride kalır. */
+  /** Discard snapshots older than the pair enclosing renderTime. Keep one snapshot behind. */
   prune(renderTime: number): number {
     let removed = 0;
     while (this.items.length >= 2 && this.items[1].serverTime <= renderTime) {
@@ -87,6 +87,6 @@ export class SnapshotBuffer<T extends Timed> {
       }
     }
 
-    return { kind: "after", from: newest, to: newest, alpha: 0 }; // ulaşılmaz
+    return { kind: "after", from: newest, to: newest, alpha: 0 }; // unreachable
   }
 }

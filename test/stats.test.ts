@@ -2,12 +2,12 @@ import { describe, expect, it } from "vitest";
 import { InterpolationStats } from "../src/stats";
 
 describe("InterpolationStats", () => {
-  it("'before' AÇLIK SAYILMAZ — 'after' ve 'empty' sayılır", () => {
+  it("'before' is NOT COUNTED AS STARVATION — 'after' and 'empty' are", () => {
     const stats = new InterpolationStats();
-    stats.frame("before", 10, 1); // başlangıç anı: tampon doluyor, donma yok
+    stats.frame("before", 10, 1); // initial moment: buffer filling, no freeze
     stats.frame("between", 10, 3);
-    stats.frame("after", 10, 3); // renderTime en yeniyi geçti: DONMA
-    stats.frame("empty", 10, 0); // hiç snapshot yok: DONMA
+    stats.frame("after", 10, 3); // renderTime exceeded newest: FREEZE
+    stats.frame("empty", 10, 0); // no snapshots at all: FREEZE
 
     expect(stats.frames).toBe(4);
     expect(stats.starvedFrames).toBe(2);
@@ -15,9 +15,9 @@ describe("InterpolationStats", () => {
     expect(stats.starvedRatio).toBe(0.5);
   });
 
-  it("longestStarveMs en uzun ARDIŞIK seriyi tutar, toplamı değil", () => {
+  it("longestStarveMs tracks the longest CONSECUTIVE streak, not the sum", () => {
     const stats = new InterpolationStats();
-    // 3 kare seri (30 ms) · kesinti · 5 kare seri (50 ms) · kesinti · 2 kare (20 ms)
+    // 3 frame streak (30 ms) · interrupted · 5 frame streak (50 ms) · interrupted · 2 frames (20 ms)
     const script: [string, number][] = [
       ["after", 3],
       ["between", 1],
@@ -32,11 +32,11 @@ describe("InterpolationStats", () => {
     }
 
     expect(stats.starvedFrames).toBe(10);
-    expect(stats.starvedMs).toBe(100); // toplam
-    expect(stats.longestStarveMs).toBe(50); // en uzun tek kesinti
+    expect(stats.starvedMs).toBe(100); // total
+    expect(stats.longestStarveMs).toBe(50); // longest single interruption
   });
 
-  it("minBufferSize hiç kare işlenmemişken sonsuz kalır, sonra en küçüğü tutar", () => {
+  it("minBufferSize remains infinite when no frames processed, then tracks minimum", () => {
     const stats = new InterpolationStats();
     expect(Number.isFinite(stats.minBufferSize)).toBe(false);
 

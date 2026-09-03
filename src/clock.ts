@@ -12,7 +12,7 @@ export class ServerClockEstimator {
     return this.samples.length;
   }
 
-  /** Penceredeki en az geciken paket = en büyük örnek. */
+  /** Packet with minimal latency in window = maximum offset sample. */
   get offset(): number {
     if (this.samples.length === 0) return 0;
     let max = this.samples[0];
@@ -32,7 +32,7 @@ export class RenderClock {
 
   constructor(public delayMs: number) {}
 
-  /** renderTime = serverNow - delay, ama ASLA geri gitmez. */
+  /** renderTime = serverNow - delay, but NEVER moves backwards. */
   advance(serverNow: number): number {
     const target = serverNow - this.delayMs;
     if (target > this.last) this.last = target;

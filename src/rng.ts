@@ -1,4 +1,4 @@
-/** mulberry32: 32 bit durumlu, tohumlu, hızlı PRNG. Bu depoda Math.random() yasak. */
+/** mulberry32: 32-bit state, seeded, fast PRNG. Math.random() is forbidden in this repository. */
 export function mulberry32(seed: number): () => number {
   let a = seed >>> 0;
   return function next(): number {

@@ -1,8 +1,8 @@
 import { defineConfig } from "vite";
 
-// Demo modern hedefle derlenir (three r185 ESM). Testler ve `npm run bench`
-// vitest / vite-node'un node ortamında koşar — tarayıcı, canvas ya da WebGL
-// bağlamı gerekmez: bu projede snapshot hattının tamamı saf mantık.
+// The demo compiles to a modern target (three r185 ESM). Tests and `npm run bench`
+// run in the node environment via vitest / vite-node — no browser, canvas, or WebGL
+// context is needed: in this project, the entire snapshot pipeline is pure logic.
 export default defineConfig({
   build: {
     target: "esnext",

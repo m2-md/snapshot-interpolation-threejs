@@ -4,7 +4,7 @@ import { createPose, interpolatePose, naiveLerpPose } from "./interpolate";
 import type { Pose } from "./interpolate";
 import type { EntityState, Snapshot } from "./snapshot";
 
-/** Bir uzak varlığın ekrandaki karşılığı: bir Object3D + kare başına yeniden kullanılan poz. */
+/** Visual representation of a remote entity: an Object3D + a per-frame reused pose. */
 export class RemoteView {
   readonly pose: Pose = createPose();
 
@@ -18,7 +18,7 @@ export class RemoteView {
     this.object.quaternion.copy(this.pose.quaternion);
   }
 
-  /** NAİF yol: snapshot'ta ne yazıyorsa oraya ışınlan. Kesik kesik atlar. */
+  /** NAIVE path: teleport to wherever snapshot specifies. Jittery stutter. */
   applyLatest(snapshot: Snapshot | null): boolean {
     const state = snapshot ? findEntity(snapshot, this.id) : null;
     if (!state) return false;
@@ -29,8 +29,8 @@ export class RemoteView {
   }
 
   /**
-   * TAMPONLU yol: kapsayan çift + alpha.
-   * `before`/`after` durumunda from === to olduğu için doğal olarak uca tutunur.
+   * BUFFERED path: enclosing pair + alpha.
+   * In `before`/`after` cases where from === to, naturally clamps to the endpoint.
    */
   applySample(sample: Sample<Snapshot>, naiveQuat = false): boolean {
     if (!sample.from || !sample.to) return false;

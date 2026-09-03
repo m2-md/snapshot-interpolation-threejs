@@ -13,7 +13,7 @@ export function createPose(): Pose {
   return { position: new Vector3(), quaternion: new Quaternion() };
 }
 
-/** Pozisyon düz çizgide, dönüş küre üstünde. Aynı alpha, farklı matematik. */
+/** Position on straight line, orientation on sphere. Same alpha, different mathematics. */
 export function interpolatePose(
   from: EntityState,
   to: EntityState,
@@ -32,10 +32,10 @@ export function interpolatePose(
 }
 
 /**
- * BİLEREK YANLIŞ karşı-örnek. Kopyalamayın.
- * Quaternion'u bileşen bileşen lerp edip normalize eder: sonuç yayın üstüne düşer
- * ama sabit hızda ilerlemez ve dot < 0 olduğunda UZUN yayı seçer (355,5°'lik takla).
- * Demodaki "NAIVE QUAT LERP" anahtarı bu yolu açar.
+ * INTENTIONALLY flawed counter-example. Do not copy.
+ * Lerps the quaternion component-wise and normalizes: the result stays on the 3-sphere
+ * but does not advance at constant angular velocity and picks the LONG arc when dot < 0 (355.5° somersault).
+ * The "NAIVE QUAT LERP" toggle in the demo activates this code path.
  */
 export function naiveLerpPose(from: EntityState, to: EntityState, alpha: number, out: Pose): Pose {
   out.position.set(from.px, from.py, from.pz);

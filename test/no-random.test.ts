@@ -14,13 +14,13 @@ function walk(dir: string, out: string[] = []): string[] {
   return out;
 }
 
-/** Yorumları at: "Math.random() yasak" yazan bir açıklama ihlal değildir. */
+/** Strip comments: an explanatory comment stating "Math.random() is forbidden" is not a violation. */
 function stripComments(source: string): string {
   return source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 }
 
-describe("determinizm sözleşmesi", () => {
-  it("src/ ve scripts/ altında Math.random( geçmiyor", () => {
+describe("determinism contract", () => {
+  it("Math.random( does not appear under src/ and scripts/", () => {
     const files = [...walk(join(root, "src")), ...walk(join(root, "scripts"))];
     expect(files.length).toBeGreaterThan(5);
 

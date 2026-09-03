@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { simulate } from "../scripts/starvation-bench";
 
-it("aynı tohum aynı açlık sayısını verir", () => {
+it("same seed produces same starvation count", () => {
   const a = simulate({ delayMs: 100, jitterMs: 40, lossRate: 0.05, seed: 1337, seconds: 10 });
   const b = simulate({ delayMs: 100, jitterMs: 40, lossRate: 0.05, seed: 1337, seconds: 10 });
   expect(a.starvedFrames).toBe(b.starvedFrames);
   expect(a.longestStarveMs).toBe(b.longestStarveMs);
 });
 
-it("gecikme büyüdükçe açlık azalır (monoton)", () => {
+it("starvation decreases as delay increases (monotonic)", () => {
   const opts = { jitterMs: 40, lossRate: 0, seed: 1337, seconds: 10 };
   const short = simulate({ ...opts, delayMs: 33 });
   const long = simulate({ ...opts, delayMs: 200 });
@@ -16,11 +16,11 @@ it("gecikme büyüdükçe açlık azalır (monoton)", () => {
 });
 
 /**
- * Yukarıdaki monotonluk testi tek başına ZAYIF bir koruma: `delayMs` hiç
- * kullanılmasa (RenderClock(0)) iki koşum da eşit çıkar ve `toBeLessThanOrEqual`
- * yine geçer. Mutasyonla yakalandı, bu test onun için var — sayılar çivileniyor.
+ * The monotonicity test above is weak on its own: if `delayMs` is not used at all
+ * (RenderClock(0)), both runs exit equal and `toBeLessThanOrEqual` still passes.
+ * Caught by mutation testing, this test pins the actual counts.
  */
-it("delayMs gerçekten etki ediyor: ±40 ms jitterde 33 ms vs 200 ms", () => {
+it("delayMs has real effect: 33 ms vs 200 ms with ±40 ms jitter", () => {
   const opts = { jitterMs: 40, lossRate: 0, seed: 1337, seconds: 10 };
   const short = simulate({ ...opts, delayMs: 33 });
   const long = simulate({ ...opts, delayMs: 200 });

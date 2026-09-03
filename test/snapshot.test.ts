@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import { createEntityState, normalizeEntity } from "../src/snapshot";
 
 describe("normalizeEntity", () => {
-  it("nicelemeden çıkmış birim OLMAYAN quaternion'u birim yapar", () => {
+  it("normalizes non-unit quaternion resulting from quantization", () => {
     const e = createEntityState(3);
-    // 120°'lik yaw quaternion'unun 1,5 katı — makaledeki 73,17° sapmasının kaynağı.
+    // 1.5x scaled 120° yaw quaternion — source of the 73.17° distortion discussed in article.
     e.qy = Math.sin(Math.PI / 3) * 1.5;
     e.qw = Math.cos(Math.PI / 3) * 1.5;
 
@@ -17,7 +17,7 @@ describe("normalizeEntity", () => {
     expect(e.qy).toBeCloseTo(Math.sin(Math.PI / 3), 15);
   });
 
-  it("sıfır uzunluklu quaternion birim (0,0,0,1)'e düşer", () => {
+  it("zero-length quaternion falls back to identity (0,0,0,1)", () => {
     const e = createEntityState(4);
     e.qx = 0;
     e.qy = 0;
@@ -28,7 +28,7 @@ describe("normalizeEntity", () => {
     expect([e.qx, e.qy, e.qz, e.qw]).toEqual([0, 0, 0, 1]);
   });
 
-  it("yerinde mutasyon yapar, yeni nesne döndürmez", () => {
+  it("mutates in place, does not return a new object", () => {
     const e = createEntityState(5);
     e.qw = 2;
     expect(normalizeEntity(e)).toBe(e);

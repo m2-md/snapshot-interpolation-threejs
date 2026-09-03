@@ -1,23 +1,23 @@
 <!doctype html>
-<html lang="tr">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Snapshot Interpolation — Işınlanan vs İnterpole Edilen</title>
+    <title>Multiplayer Snapshot Interpolation in Three.js</title>
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
     <canvas id="scene"></canvas>
 
     <div id="labels">
-      <span class="label label-naive">SOL: NAIVE (SNAPSHOT GELDİ, IŞINLAN)</span>
-      <span class="label label-interp">SAĞ: SNAPSHOT INTERPOLATION</span>
+      <span class="label label-naive">LEFT: NAIVE (TELEPORT ON SNAPSHOT)</span>
+      <span class="label label-interp">RIGHT: SNAPSHOT INTERPOLATION</span>
     </div>
 
     <aside id="hud"></aside>
 
     <aside id="controls">
-      <h2>KONTROL</h2>
+      <h2>CONTROLS</h2>
 
       <label class="ctl">
         <span class="ctl-name">SNAPSHOT RATE</span>
@@ -46,16 +46,16 @@
       <label class="ctl">
         <span class="ctl-name">LOSS RATE</span>
         <input id="loss" type="range" min="0" max="30" step="1" value="0" />
-        <output id="loss-out">%0</output>
+        <output id="loss-out">0%</output>
       </label>
 
       <label class="ctl ctl-check">
         <input id="naive-quat" type="checkbox" />
-        <span class="ctl-name">NAIVE QUAT LERP (sağ küme)</span>
+        <span class="ctl-name">NAIVE QUAT LERP (right cluster)</span>
       </label>
 
-      <button id="measure" type="button">Ölç (10 s)</button>
-      <p id="measure-state" class="hint">Ölçüm elle tetiklenir. Otomatik süpürme yok.</p>
+      <button id="measure" type="button">Measure (10 s)</button>
+      <p id="measure-state" class="hint">Measurement triggered manually. No auto sweep.</p>
     </aside>
 
     <script type="module" src="/src/main.ts"></script>

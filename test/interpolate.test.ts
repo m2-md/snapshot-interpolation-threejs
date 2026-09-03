@@ -15,7 +15,7 @@ function state(px: number, pz: number, yawDeg: number): EntityState {
 }
 
 describe("interpolatePose", () => {
-  it("alpha = 0'da sonuç TAM olarak 'from' (pozisyon ve dönüş)", () => {
+  it("at alpha = 0 result is exactly 'from' (position and rotation)", () => {
     const from = state(-3, 7, -178.8);
     const to = state(9, -2, 176.7);
     const out = interpolatePose(from, to, 0, createPose());
@@ -27,19 +27,19 @@ describe("interpolatePose", () => {
     expect(out.quaternion.w).toBe(from.qw);
   });
 
-  it("alpha = 1'de sonuç 'to' — ama toBeCloseTo ile (a + (b - a) tam b değil)", () => {
+  it("at alpha = 1 result is 'to' — tested with toBeCloseTo (a + (b - a) is not exactly b)", () => {
     const from = state(-3, 7, 10);
     const to = state(9, -2, 40);
     const out = interpolatePose(from, to, 1, createPose());
 
     expect(out.position.x).toBeCloseTo(to.px, 12);
     expect(out.position.z).toBeCloseTo(to.pz, 12);
-    // Dönüş aynı: bileşen eşitliği ARAMIYORUZ, açı farkına bakıyoruz.
+    // Rotation identical: not checking component equality, checking angle difference.
     const target = new Quaternion(to.qx, to.qy, to.qz, to.qw);
     expect(out.quaternion.angleTo(target)).toBeCloseTo(0, 6);
   });
 
-  it("kare başına tahsis yok: aynı 'out' nesnesi ve alanları geri dönüyor", () => {
+  it("zero per-frame allocation: same 'out' object and fields returned", () => {
     const from = state(0, 0, 0);
     const to = state(4, 4, 90);
     const pose = createPose();
@@ -54,16 +54,16 @@ describe("interpolatePose", () => {
     }
   });
 
-  it("naiveLerpPose dot<0 çiftinde slerp'ten SAPAR, interpolatePose sapmaz", () => {
-    // -178.8° -> 176.7°: gerçek dönüş 4,5°, dot negatif.
+  it("naiveLerpPose DIVERGES from slerp on dot < 0 pairs, interpolatePose does not", () => {
+    // -178.8° -> 176.7°: true rotation is 4.5°, dot is negative.
     const from = state(0, 0, -178.8);
     const to = state(0, 0, 176.7);
 
     const good = interpolatePose(from, to, 0.5, createPose());
     const bad = naiveLerpPose(from, to, 0.5, createPose());
 
-    // Kısa yolun ortası -180,05° (yani +179,95°) civarı; uzun yolunki tam ters taraf.
+    // Midpoint of short arc is around -180.05° (i.e. +179.95°); long arc is exactly opposite.
     expect(good.quaternion.angleTo(bad.quaternion)).toBeGreaterThan(3);
-    expect(bad.quaternion.length()).toBeCloseTo(1, 12); // normalize edilmiş ama yanlış yayda
+    expect(bad.quaternion.length()).toBeCloseTo(1, 12); // normalized but on wrong arc
   });
 });

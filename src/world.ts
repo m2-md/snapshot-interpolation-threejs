@@ -17,9 +17,9 @@ export function poseAt(cfg: RemoteConfig, serverTimeMs: number, out: EntityState
   out.py = cfg.y;
   out.pz = Math.sin(a) * cfg.radius;
 
-  // Teğet yön. atan2 açıyı (-π, π] aralığına SARAR; bu yüzden quaternion'un
-  // işareti tur başına bir kez atlar ve dot çarpımı negatife düşer.
-  // Slerp tuzağını demoda görebilmemizin sebebi bu satır.
+  // Tangent heading. atan2 wraps angle to (-π, π]; hence quaternion
+  // sign flips once per revolution and dot product drops below zero.
+  // This line is why we can demonstrate the slerp trap in the demo.
   const yaw = Math.atan2(-Math.sin(a), Math.cos(a));
   const half = yaw * 0.5;
 
@@ -30,7 +30,7 @@ export function poseAt(cfg: RemoteConfig, serverTimeMs: number, out: EntityState
   return out;
 }
 
-/** Dört uzak "oyuncu". Demo iki küme çizdiği için sahnede toplam 8 küp olur. */
+/** Four remote "players". Because the demo renders two clusters, there are 8 cubes in total on stage. */
 export const REMOTES: readonly RemoteConfig[] = [
   { id: 1, radius: 3.2, speed: 0.9, phase: 0, y: 0.5 },
   { id: 2, radius: 2.1, speed: -1.35, phase: 1.9, y: 0.5 },
@@ -39,9 +39,9 @@ export const REMOTES: readonly RemoteConfig[] = [
 ];
 
 /**
- * Sabit adımlı sahte sunucu. Akümülatör yerine `nextAt` tutar: dt şişse bile
- * snapshot zaman damgaları kayma biriktirmez. `guard` ikinci savunma hattı —
- * sekme arka plandan dönünce tek karede snapshot seli üretilmesini engeller.
+ * Fixed-step mock server. Tracks `nextAt` instead of an accumulator: even if dt spikes,
+ * snapshot timestamps will not drift. `guard` is the second line of defense —
+ * prevents a flood of snapshots in a single frame when returning from a background tab.
  */
 export class FakeServer {
   tick = 0;
@@ -59,7 +59,7 @@ export class FakeServer {
     return this.nextAt;
   }
 
-  /** serverTime'a kadar biriken snapshot'ları üretir ve emit'e verir. */
+  /** Generates snapshots accumulated up to serverTime and emits them. */
   update(serverTime: number, emit: (snapshot: Snapshot, emittedAt: number) => void): number {
     let emitted = 0;
     let guard = 0;

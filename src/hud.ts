@@ -1,6 +1,4 @@
-// src/hud.ts — etiketler KAYNAKTA BÜYÜK yazılır.
-// text-transform: uppercase + lang="tr" İngilizce "i" harfini "İ" yapar:
-// INTERPOLATION -> İNTERPOLATİON. Sinsi bir hata, bir kez yaşayan unutmaz.
+// src/hud.ts — labels are written in uppercase in source.
 export const MEASURED_LABELS = [
   "SNAPSHOTS RECEIVED",
   "DROPPED",
@@ -26,21 +24,21 @@ export type MeasuredLabel = (typeof MEASURED_LABELS)[number];
 export type ModelLabel = (typeof MODEL_LABELS)[number];
 
 /**
- * İki bloklu teşhis paneli.
+ * Two-block diagnostic panel.
  *
- * MEASURED = bu koşumda gerçekten sayılmış değerler (transport sayaçları, tampon
- * boyu, açlık istatistikleri, son alpha).
- * MODEL    = kaydırıcılardan gelen yapısal ayarlar; ölçüm DEĞİL.
+ * MEASURED = actual counted values for this run (transport counters, buffer
+ * size, starvation statistics, final alpha).
+ * MODEL    = structural settings from sliders; not measurements.
  *
- * Ayrım kozmetik değil: ölçülmüş bir sayı ile modelden gelen bir sabit aynı listede
- * yan yana durursa okur ikisini de ölçüm sanır.
+ * The separation is not cosmetic: if a measured count and a model constant
+ * were shown side-by-side in the same list, the reader could mistake both for measurements.
  */
 export class Hud {
   private readonly cells = new Map<string, HTMLElement>();
 
   constructor(root: HTMLElement) {
-    root.appendChild(this.block("MEASURED", "ölçülen", MEASURED_LABELS));
-    root.appendChild(this.block("MODEL", "yapısal ayar", MODEL_LABELS));
+    root.appendChild(this.block("MEASURED", "measured", MEASURED_LABELS));
+    root.appendChild(this.block("MODEL", "settings", MODEL_LABELS));
   }
 
   private block(title: string, subtitle: string, labels: readonly string[]): HTMLElement {

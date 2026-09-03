@@ -12,7 +12,7 @@ export class InterpolationStats {
     this.frames++;
     if (bufferSize < this.minBufferSize) this.minBufferSize = bufferSize;
 
-    // "after" = renderTime en yeni snapshot'ı geçti = elimizde bilgi kalmadı.
+    // "after" = renderTime passed the newest snapshot = out of fresh data.
     if (kind === "after" || kind === "empty") {
       this.starvedFrames++;
       this.starvedMs += dtMs;

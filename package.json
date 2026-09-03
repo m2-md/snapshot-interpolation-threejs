@@ -1,7 +1,7 @@
 {
   "name": "snapshot-interpolation-threejs",
   "version": "1.0.0",
-  "description": "Three.js'te snapshot interpolation: sıralı snapshot tamponu, geri sarmayan render saati, lerp + slerp, tohumlu sahte taşıma katmanı ve tarayıcısız açlık ölçümü",
+  "description": "Smooth remote entity synchronization over lossy networks: ring buffer snapshot history, Hermite position interpolation, quaternion Slerp, and dynamic latency adjustment.",
   "type": "module",
   "license": "MIT",
   "scripts": {

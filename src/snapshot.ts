@@ -11,11 +11,11 @@ export interface EntityState {
 
 export interface Snapshot {
   tick: number;
-  serverTime: number; // ms, sunucu saati
+  serverTime: number; // ms, server clock
   entities: EntityState[];
 }
 
-/** Boş bir varlık durumu (birim quaternion ile). */
+/** Empty entity state (with identity quaternion). */
 export function createEntityState(id = 0): EntityState {
   return { id, px: 0, py: 0, pz: 0, qx: 0, qy: 0, qz: 0, qw: 1 };
 }
@@ -26,7 +26,7 @@ export function normalizeEntity(e: EntityState): EntityState {
     e.qx = 0;
     e.qy = 0;
     e.qz = 0;
-    e.qw = 1; // birim quaternion
+    e.qw = 1; // identity quaternion
     return e;
   }
   const inv = 1 / len;

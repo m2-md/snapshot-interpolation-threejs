@@ -42,8 +42,7 @@ body {
   pointer-events: none;
 }
 
-/* DİKKAT: text-transform: uppercase YOK. lang="tr" ile birlikte İngilizce "i"
-   harfini "İ" yapar (INTERPOLATION -> İNTERPOLATİON). Etiketler kaynakta büyük. */
+/* NOTE: No text-transform: uppercase used. Labels are uppercase in source. */
 .label {
   letter-spacing: 0.08em;
   font-size: 11px;

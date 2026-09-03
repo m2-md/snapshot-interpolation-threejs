@@ -11,14 +11,14 @@ function run(lossRate: number): number[] {
   return arrivals;
 }
 
-it("aynı tohum aynı diziyi verir", () => {
+it("same seed yields same sequence", () => {
   expect(run(0)).toEqual(run(0));
 });
 
-it("kayıp oranını değiştirmek jitter akışını BOZMAZ", () => {
+it("changing loss rate DOES NOT disrupt jitter sequence", () => {
   const clean = run(0);
   const lossy = run(0.2);
-  // Kayıplı koşumda gelenlerin hepsi temiz koşumda da aynı SIRADA var.
+  // Packets that arrive in the lossy run also appear in the same ORDER in the clean run.
   const cleanIndex = new Map(clean.map((v, i) => [v, i]));
   let last = -1;
   for (const v of lossy) {
@@ -30,7 +30,7 @@ it("kayıp oranını değiştirmek jitter akışını BOZMAZ", () => {
   expect(lossy.length).toBeLessThan(clean.length);
 });
 
-it("yeterli jitter sıra bozulması üretir", () => {
+it("sufficient jitter produces out-of-order packets", () => {
   const t = new FakeTransport<number>({ latencyMs: 60, jitterMs: 60, lossRate: 0, seed: 7 });
   for (let i = 0; i < 300; i++) {
     t.send(i, i * 33.33);

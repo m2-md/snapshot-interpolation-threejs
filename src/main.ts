@@ -22,7 +22,7 @@ import { InterpolationStats } from "./stats";
 import { FakeTransport } from "./transport";
 import { FakeServer, REMOTES } from "./world";
 
-// ---------------------------------------------------------------- sahne (hafif)
+// ---------------------------------------------------------------- scene (lightweight)
 const canvas = document.getElementById("scene") as HTMLCanvasElement;
 const renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -32,11 +32,10 @@ renderer.setClearAlpha(0);
 
 const scene = new Scene();
 const camera = new PerspectiveCamera(46, 1, 0.1, 200);
-// Kamera hedefi küplerin ÜSTÜNDE: bakılan nokta yükseldikçe sahne ekranda
-// aşağı kayıyor ve iki küme, sağ/sol cam panellerin altındaki boş şeride
-// düşüyor. Panelleri küçültmek yerine sahneyi indirmek daha sağlam — panel
-// yüksekliği içeriğe göre değişir, kamera değişmez.
-// Konum ve hedef `resize()` içinde en-boy oranından hesaplanıyor (aşağıda).
+// Camera target is ABOVE the cubes: as the look-at point rises, the scene shifts
+// downward on screen and the two clusters fall into the clear space beneath the glass panels.
+// Shifting the scene down is more robust than shrinking panels — panel height varies with content, camera does not.
+// Position and target are computed from aspect ratio in resize() below.
 
 scene.add(new AmbientLight(0x5566aa, 0.9));
 const key = new DirectionalLight(0xffffff, 1.5);
@@ -56,7 +55,7 @@ const interpGroup = new Group();
 interpGroup.position.x = INTERP_X;
 scene.add(naiveGroup, interpGroup);
 
-const cube = new BoxGeometry(0.7, 0.7, 1.1); // uzun ekseni +Z: dönüş gözle görünür
+const cube = new BoxGeometry(0.7, 0.7, 1.1); // long axis +Z: rotation is clearly visible
 
 function makeViews(group: Group, color: number, emissive: number): RemoteView[] {
   return REMOTES.map((cfg) => {
@@ -78,7 +77,7 @@ function makeViews(group: Group, color: number, emissive: number): RemoteView[] 
 const naiveViews = makeViews(naiveGroup, 0x0d3b47, 0x22d3ee);
 const interpViews = makeViews(interpGroup, 0x2b2350, 0xa78bfa);
 
-// ---------------------------------------------------------- ağ hattı (sahte, tohumlu)
+// ---------------------------------------------------------- network pipeline (mock, seeded)
 const SEED = 1337;
 let rateHz = 15;
 
@@ -94,7 +93,7 @@ const estimator = new ServerClockEstimator();
 const renderClock = new RenderClock(100);
 const stats = new InterpolationStats();
 
-let latest: Snapshot | null = null; // naif yolun tek hafızası
+let latest: Snapshot | null = null; // single memory slot for naive approach
 let lastAlpha = 0;
 let lastKind = "empty";
 
@@ -125,7 +124,7 @@ function syncModel(): void {
   out("delay-out").textContent = `${renderClock.delayMs} ms`;
   out("latency-out").textContent = `${transport.latencyMs} ms`;
   out("jitter-out").textContent = `±${transport.jitterMs} ms`;
-  out("loss-out").textContent = `%${Math.round(transport.lossRate * 100)}`;
+  out("loss-out").textContent = `${Math.round(transport.lossRate * 100)}%`;
 
   hud.set("SNAPSHOT RATE", `${rateHz} Hz · ${(1000 / rateHz).toFixed(1)} ms`);
   hud.set("INTERPOLATION DELAY", `${renderClock.delayMs} ms`);
@@ -135,7 +134,7 @@ function syncModel(): void {
   );
   hud.set("LATENCY", `${transport.latencyMs} ms`);
   hud.set("JITTER", `±${transport.jitterMs} ms`);
-  hud.set("LOSS RATE", `%${Math.round(transport.lossRate * 100)}`);
+  hud.set("LOSS RATE", `${Math.round(transport.lossRate * 100)}%`);
 }
 
 for (const input of [rateInput, delayInput, latencyInput, jitterInput, lossInput]) {
@@ -143,7 +142,7 @@ for (const input of [rateInput, delayInput, latencyInput, jitterInput, lossInput
 }
 syncModel();
 
-// Ölçüm ELLE tetiklenir: sıfırla, 10 saniye say, sonucu dondur.
+// Measurement is manually triggered: reset, count 10 seconds, freeze result.
 let measuringUntil = -1;
 let frozen: string | null = null;
 
@@ -152,23 +151,23 @@ measureButton.addEventListener("click", () => {
   frozen = null;
   measuringUntil = clientNow + 10_000;
   measureButton.disabled = true;
-  measureState.textContent = "Ölçülüyor…";
+  measureState.textContent = "Measuring…";
 });
 
-// ------------------------------------------------------------------- kare döngüsü
+// ------------------------------------------------------------------- frame loop
 let clientNow = 0;
 let lastFrameAt = performance.now();
 
 function frame(now: number): void {
   const rawDt = now - lastFrameAt;
   lastFrameAt = now;
-  // Sekme arka plandan dönünce rawDt saniyeler olur; kelepçelemezsek FakeServer
-  // tek karede yüzlerce snapshot üretir. (guard ikinci savunma hattı.)
+  // When returning from background tab, rawDt can be seconds; clamping avoids FakeServer
+  // generating hundreds of snapshots in a single frame. (guard is second line of defense.)
   const dt = Math.min(rawDt, 100);
   clientNow += dt;
 
-  // Bu demoda sunucu saati = istemci saati + 0. Kestirimci yine de gerçek işini
-  // yapıyor: örnekleri toplayıp offset'i tek yönlü gecikmeden türetiyor.
+  // In this demo server clock = client clock + 0. The estimator still performs its real job:
+  // collecting samples and deriving the offset from one-way delay.
   server.update(clientNow, (snapshot, emittedAt) => {
     transport.send(snapshot, emittedAt);
   });
@@ -194,10 +193,10 @@ function frame(now: number): void {
   if (measuringUntil > 0 && clientNow >= measuringUntil) {
     measuringUntil = -1;
     frozen =
-      `${stats.starvedFrames}/${stats.frames} kare aç · ` +
-      `en uzun ${stats.longestStarveMs.toFixed(0)} ms`;
+      `${stats.starvedFrames}/${stats.frames} starved frames · ` +
+      `longest ${stats.longestStarveMs.toFixed(0)} ms`;
     measureButton.disabled = false;
-    measureState.textContent = `Sonuç: ${frozen}`;
+    measureState.textContent = `Result: ${frozen}`;
   }
 
   writeHud();
@@ -215,18 +214,17 @@ function writeHud(): void {
     Number.isFinite(stats.minBufferSize) ? String(stats.minBufferSize) : "—",
   );
   hud.set("STARVED FRAMES", `${stats.starvedFrames} / ${stats.frames}`);
-  hud.set("STARVED RATIO", `%${(stats.starvedRatio * 100).toFixed(2)}`);
+  hud.set("STARVED RATIO", `${(stats.starvedRatio * 100).toFixed(2)}%`);
   hud.set("LONGEST STARVE", `${stats.longestStarveMs.toFixed(0)} ms`);
   hud.set("CURRENT ALPHA", `${lastAlpha.toFixed(3)} · ${lastKind}`);
 }
 
-/** Kadrajda tutulması gereken en uzak nokta: küme merkezi + en geniş yörünge. */
+/** Furthest point to keep in frame: cluster center + widest orbit. */
 const HALF_SPREAD = INTERP_X + Math.max(...REMOTES.map((r) => r.radius));
 
-/** Kamera hedefi küplerin ÜSTÜNDE: bakılan nokta yükseldikçe sahne ekranda
- *  aşağı kayıyor ve iki küme, sağ/sol cam panellerin altındaki boş şeride
- *  düşüyor. Panelleri küçültmek yerine sahneyi indirmek daha sağlam — panel
- *  yüksekliği içeriğe göre değişir, kamera değişmez. */
+/** Camera target is ABOVE the cubes: as the look-at point rises, the scene shifts
+ *  downward on screen and the two clusters fall into the clear space beneath the glass panels.
+ *  Shifting the scene down is more robust than shrinking panels — panel height varies with content, camera does not. */
 const TARGET_Y = 6;
 
 function resize(): void {
@@ -235,10 +233,10 @@ function resize(): void {
   renderer.setSize(w, h, false);
   camera.aspect = w / h;
 
-  // Mesafeyi sabit yazmak dar-uzun bir pencerede dış küpleri kadrajdan taşırıyor:
-  // yatay FOV, dikey FOV'dan aspect ile türüyor ve aspect < 1 olduğunda daralıyor.
-  // Bu yüzden uzaklığı HALF_SPREAD'i sığdıracak şekilde HER YENİDEN BOYUTLANDIRMADA
-  // hesaplıyoruz. %12 pay, küpün kendi yarım genişliği ve perspektif payı için.
+  // Hardcoding distance causes outer cubes to clip in tall/narrow windows:
+  // horizontal FOV derives from vertical FOV with aspect ratio and narrows when aspect < 1.
+  // Therefore we compute distance on every RESIZE to fit HALF_SPREAD.
+  // 12% margin accounts for cube half-width and perspective buffer.
   const halfV = (camera.fov * Math.PI) / 360;
   const halfH = Math.atan(Math.tan(halfV) * camera.aspect);
   const distance = Math.max(18, (HALF_SPREAD * 1.12) / Math.tan(halfH));
